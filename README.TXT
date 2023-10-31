@@ -1,3 +1,13 @@
+# Holub SQL 기능 확장 및 응용 서비스 개발 
+---
+2023-2학기 설계패턴 01분반 14조 
+
+텀프로젝트 레포지토리
+
+
+
+
+
 HolubSQL.jar
 Version 1.0
 Released 27 Sept., 2004
