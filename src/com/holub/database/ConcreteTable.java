@@ -79,6 +79,13 @@ import com.holub.tools.ArrayIterator;
 	}
 
 	/**********************************************************************
+	 * Return the array of the columns
+	 */
+	public String[] getColumnNames() {
+		return columnNames;
+	}
+
+	/**********************************************************************
 	 * Return the index of the named column. Throw an IndexOutOfBoundsException if
 	 * the column doesn't exist.
 	 */
@@ -459,6 +466,20 @@ import com.holub.tools.ArrayIterator;
 
 		// Create places to hold the result of the join and to hold
 		// iterators for each table involved in the join.
+		
+		if (requestedColumns == null) { // SELECT * of join
+			List<String> allColumns = new ArrayList<String>();
+
+			for (int i = 0; i < allTables.length; i++) {
+				ConcreteTable concreteTable = (ConcreteTable)allTables[i];
+				final String[] columns = concreteTable.getColumnNames();
+
+				for (int j = 0; j < columns.length; j++)
+					allColumns.add(columns[j]);
+			}
+
+			requestedColumns = allColumns.toArray(new String[allColumns.size()]);
+		}
 
 		Table resultTable = new ConcreteTable(null, requestedColumns);
 		Cursor[] envelope = new Cursor[allTables.length];
