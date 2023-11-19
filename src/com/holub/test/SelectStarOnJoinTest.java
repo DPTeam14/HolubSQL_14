@@ -59,7 +59,7 @@ public class SelectStarOnJoinTest {
 
         try {
             // 데이터베이스 열기
-            connection = DriverManager.getConnection("file:/C:/dp2023/HolubSQL_14/src/com/holub/database/Dbase", "harpo", "swordfish");
+            connection = DriverManager.getConnection("file:/C:/dp2023", "harpo", "swordfish");
             statement = connection.createStatement();
         } catch( SQLException e ) {
             System.err.println("Could not open test database");
