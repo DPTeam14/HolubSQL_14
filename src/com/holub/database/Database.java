@@ -402,7 +402,20 @@ public final class Database
 		USE			= tokens.create( "'USE"		),
 		VALUES 		= tokens.create( "'VALUES"	),
 		WHERE		= tokens.create( "'WHERE"	),
-
+		
+		//	keyword 식별 토큰
+		DISTINCT	= tokens.create( "'DISTINCT"	),
+		GROUP_BY	= tokens.create( "'GROUP BY"	),
+		ORDER_BY	= tokens.create( "'ORDER BY"	),
+		ASC			= tokens.create("'ASC"),
+		DESC		= tokens.create("'DESC"),
+		COUNT		= tokens.create("'COUNT"),
+		AVG			= tokens.create("'AVG"),
+		SUM			= tokens.create("'SUM"),
+		MIN			= tokens.create("'MIN"),
+		MAX			= tokens.create("'MAX"),
+		AGGREGATE	= tokens.create( "COUNT|AVG|SUM|MIN|MAX"),
+		
 		WORK		= tokens.create( "WORK|TRAN(SACTION)?"		),
 		ADDITIVE	= tokens.create( "\\+|-" 					),
 		STRING		= tokens.create( "(\".*?\")|('.*?')"		),
@@ -830,14 +843,74 @@ public final class Database
 		if( in.matchAdvance(STAR) == null )
 		{	identifiers = new ArrayList();
 			String id;
-			while( (id = in.required(IDENTIFIER)) != null )
-			{	identifiers.add(id);
+			while(true)
+			{
+				if ( (id = in.matchAdvance(IDENTIFIER)) != null )
+					identifiers.add(id);				
+				else if ( (id = findAggregate()) != null )
+					identifiers.add(id);				
+				else
+					throw in.failure("identifier or aggregate function expected");
+
 				if( in.matchAdvance(COMMA) == null )
 					break;
 			}
 		}
 		return identifiers;
 	}
+
+	private String findAggregate() throws ParseFailure {
+
+		String id;
+
+		if ( (id = in.matchAdvance(COUNT)) != null )
+			in.required(LP);
+		else if ( (id = in.matchAdvance(SUM)) != null )
+			in.required(LP);
+		else if ( (id = in.matchAdvance(MIN)) != null )
+			in.required(LP);
+		else if ( (id = in.matchAdvance(MAX)) != null )
+			in.required(LP);
+		else if ( (id = in.matchAdvance(AVG)) != null )
+			in.required(LP);
+		else
+			return null;
+
+		id += "(";
+
+		if( in.matchAdvance(STAR) == null ) {
+			String inner_id = null;
+			if ( (inner_id = in.matchAdvance(DISTINCT)) != null ) 
+				id += "distinct ";
+			if ( (inner_id = in.matchAdvance(IDENTIFIER)) != null ) 
+				id += inner_id;
+			else 
+				throw in.failure("distinct or identifier expected.");
+		}
+		else {
+			id += "null";
+		}
+
+		in.required(RP);
+		id += ")";
+
+		return id;
+	}
+
+// idList 원본
+//	private List idList()			throws ParseFailure
+//	{	List identifiers = null;
+//		if( in.matchAdvance(STAR) == null )
+//		{	identifiers = new ArrayList();
+//			String id;
+//			while( (id = in.required(IDENTIFIER)) != null )
+//			{	identifiers.add(id);
+//				if( in.matchAdvance(COMMA) == null )
+//					break;
+//			}
+//		}
+//		return identifiers;
+//	}
 
 	//----------------------------------------------------------------------
 	// declarations  ::= IDENTIFIER [type] declaration'
