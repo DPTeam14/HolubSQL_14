@@ -244,6 +244,11 @@ public interface Table extends Serializable, Cloneable
 	 */
 	Cursor rows();
 
+	// 자신의 rows 에서 중복된 row 제외한 table 반환	양원우
+	Table distinct();
+	Table orderby(List order_by, String order);
+	void agg_test(String columnName);
+	
 	/** Build a representation of the Table using the
 	 *  specified Exporter. Create an object from an
 	 *  {@link Table.Importer} using the constructor with an

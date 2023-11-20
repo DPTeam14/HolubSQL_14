@@ -66,6 +66,8 @@ import com.holub.tools.ArrayIterator;
 
 	private transient boolean isDirty = false;
 	private transient LinkedList transactionStack = new LinkedList();
+	
+	private AggregateStrategy agg_strat = null;
 
 	/**********************************************************************
 	 * Create a table with the given name and columns.
@@ -603,6 +605,86 @@ import com.holub.tools.ArrayIterator;
 
 	// @select-end
 	// ----------------------------------------------------------------------
+	
+	// DISTINCT
+	public Table distinct() {
+		ConcreteTable resultTable = new ConcreteTable(null, this.columnNames);
+		Results cur_org = (Results) this.rows();
+		Results cur_res;
+		boolean dup;
+		
+		while (cur_org.advance() && this.rowSet.size()>0) {
+			cur_res = (Results) resultTable.rows();
+			dup = false;
+			while(cur_res.advance()) {
+				dup = isDuplicated(cur_org.cloneRow(), cur_res.cloneRow());
+				if (dup)	break;
+			}
+			if (!dup)	resultTable.insert(cur_org.cloneRow());
+			}
+		return resultTable;
+	}
+	
+	public boolean isDuplicated (Object[] arr1, Object[] arr2) {
+		int cnt = 0;
+		if (arr1.length != arr2.length)	return false;
+		while (arr1.length > cnt) {
+			if (!arr1[cnt].toString().equals(arr2[cnt].toString()))	return false;
+			cnt++;
+		}
+		return true;
+	}
+	
+	// ORDER BY
+	public Table orderby(List order_by, String order) {
+		ConcreteTable resultTable = new ConcreteTable(null, this.columnNames);
+		
+		// will be implemented...
+		
+		return resultTable;
+	}
+	public void testPrint(Object[] arr) {
+		int cnt = 0;
+		while (arr.length > cnt) {
+			System.out.print(arr[cnt].toString() + "\t");
+			cnt++;
+		}
+		System.out.println();
+	}
+	
+	// Sorting order
+	public void ascending (List idList) {
+		
+	}
+	
+	private void swap () {
+		
+	}
+	
+	// Test method for Aggregate function
+	public void agg_test(String columnName) {
+		System.out.println("==COUNT==");
+		this.agg_strat = new AggCount();
+		System.out.println(agg_strat.apply(this, columnName));
+		
+		System.out.println("==SUM==");
+		this.agg_strat = new AggSum();
+		System.out.println(agg_strat.apply(this, columnName));
+		
+		System.out.println("==AVG==");
+		this.agg_strat = new AggAverage();
+		System.out.println(agg_strat.apply(this, columnName));
+		
+		System.out.println("==MIN==");
+		this.agg_strat = new AggMin();
+		System.out.println(agg_strat.apply(this, columnName));
+		
+		System.out.println("==MAX==");
+		this.agg_strat = new AggMax();
+		System.out.println(agg_strat.apply(this, columnName));
+		
+	}
+	
 	// Housekeeping stuff
 	//
 	public String name() {

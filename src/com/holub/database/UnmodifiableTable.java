@@ -114,4 +114,22 @@ public class UnmodifiableTable implements Table
 	 *  that was passed to the constructor. Use the method with care.
 	 */
 	public Table extract(){ return wrapped;	}
+
+	@Override
+	public Table distinct() {
+		// TODO Auto-generated method stub
+		return wrapped.distinct();
+	}
+
+	@Override
+	public Table orderby(List order_by, String order) {
+		// TODO Auto-generated method stub
+		return wrapped.orderby(order_by, order);
+	}
+
+	@Override
+	public void agg_test(String columnName) {
+		// TODO Auto-generated method stub
+		wrapped.agg_test(columnName);
+	}
 }

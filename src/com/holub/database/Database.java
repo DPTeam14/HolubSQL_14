@@ -809,7 +809,12 @@ public final class Database
 			affectedRows = doDelete( tableName, expr() );
 		}
 		else if( in.matchAdvance(SELECT) != null )
-		{	List columns = idList();
+		{	
+			boolean distinct = false;
+			if (in.matchAdvance(DISTINCT) != null)
+				 distinct = true;
+			
+			List columns = idList();
 
 			String into = null;
 			if( in.matchAdvance(INTO) != null )
@@ -820,8 +825,16 @@ public final class Database
 
 			Expression where = (in.matchAdvance(WHERE) == null)
 								? null : expr();
+			
+			List group_by = (in.matchAdvance(GROUP_BY) == null)
+					? null : idList();
+
+			List order_by = (in.matchAdvance(ORDER_BY) == null)
+					? null : orderList();
+//			System.out.println("orderList() : " + order_by);
+			
 			Table result = doSelect(columns, into,
-								requestedTableNames, where );
+								requestedTableNames, where, distinct, group_by, order_by );
 			return result;
 		}
 		else
@@ -912,6 +925,30 @@ public final class Database
 //		return identifiers;
 //	}
 
+	
+	// 테스트용 변형 idList	양원우
+		private List orderList()			throws ParseFailure
+		{	List identifiers = null;
+			if( in.matchAdvance(STAR) == null )
+			{	identifiers = new ArrayList();
+				String id;
+				String order;
+				while( (id = in.required(IDENTIFIER)) != null ) {
+					identifiers.add(id);
+
+//					if ((order = in.matchAdvance(ASC_DESC)) != null ) {
+//						System.out.println("add");
+//					}
+//					else	order = "asc";
+//					identifiers.add(order);
+					
+					if( in.matchAdvance(COMMA) == null )
+						break;
+				}
+			}
+			return identifiers;
+		}
+	
 	//----------------------------------------------------------------------
 	// declarations  ::= IDENTIFIER [type] declaration'
 	// declarations' ::= COMMA IDENTIFIER [type] [NOT [NULL]] declarations'
@@ -1464,7 +1501,10 @@ public final class Database
 	//
 	private Table doSelect( List columns, String into,
 										List requestedTableNames,
-										final Expression where )
+										final Expression where,
+										boolean distinct,
+										List group_by,
+										List order_by)
 										throws ParseFailure
 	{
 
@@ -1510,10 +1550,25 @@ public final class Database
 		try
 		{	Table result = primary.select(selector, columns, participantsInJoin);
 
+			// Distinct 적용
+			if (distinct) {
+				Table temp = result.distinct();
+				result = temp;
+			}
+			// Order by 적용
+			if (order_by != null) {
+//						Table temp = result.orderby(order_by, order);
+//						result = temp;
+			}
+			
+			// Aggregate functions Test
+			// select * from sample2		use this query to test
+			System.out.println("==Aggregate Function Test==");
+//			result.agg_test("salary");
+		
 			// If this is a "SELECT INTO <table>" request, remove the 
 			// returned table from the UnmodifiableTable wrapper, give
 			// it a name, and put it into the tables Map.
-
 			if( into != null )
 			{	result = ((UnmodifiableTable)result).extract();
 				result.rename(into);
