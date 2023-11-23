@@ -95,6 +95,9 @@ public interface Cursor
 	 */
 	String columnName(int index);
 
+	// Cursor 에서 Table 의 colNames 을 접근
+	String[] columnNames();
+	
 	/** Return the contents of the requested column of the current
 	 *  row. You should
 	 *  treat the cells accessed through this method as read only

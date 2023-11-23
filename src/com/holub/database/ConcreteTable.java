@@ -232,6 +232,11 @@ import com.holub.tools.ArrayIterator;
 		public String columnName(int index) {
 			return columnNames[index];
 		}
+		
+		// Cursor 를 통해서 colNames 획득
+		public String[] columnNames() {
+			return columnNames;
+		}
 
 		public Object column(String columnName) {
 			return row[indexOf(columnName)];
@@ -635,14 +640,11 @@ import com.holub.tools.ArrayIterator;
 		return true;
 	}
 	
-	// ORDER BY
-	public Table orderby(List order_by, String order) {
-		ConcreteTable resultTable = new ConcreteTable(null, this.columnNames);
-		
-		// will be implemented...
-		
-		return resultTable;
+	// ORDER BY - Visitor Accept
+	public Table accept(Visitor visitor) {
+		return visitor.visit(this);
 	}
+	
 	public void testPrint(Object[] arr) {
 		int cnt = 0;
 		while (arr.length > cnt) {
@@ -650,15 +652,6 @@ import com.holub.tools.ArrayIterator;
 			cnt++;
 		}
 		System.out.println();
-	}
-	
-	// Sorting order
-	public void ascending (List idList) {
-		
-	}
-	
-	private void swap () {
-		
 	}
 	
 	// Test method for Aggregate function
