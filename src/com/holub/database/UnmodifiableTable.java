@@ -132,4 +132,9 @@ public class UnmodifiableTable implements Table
 		// TODO Auto-generated method stub
 		return visitor.visit(wrapped, order_by);
 	}
+	
+	public Table groupby(List group_by, List columns) {
+		// TODO Auto-generated method stub
+		return wrapped.groupby(group_by, columns);
+	}
 }

@@ -249,6 +249,8 @@ public interface Table extends Serializable, Cloneable
 	// Order by		Visitor 패턴 적용으로 인한 accept 함수
 	Table accept(Visitor visitor, List order_by);
 	void agg_test(String columnName);
+
+	Table groupby(List group_by, List columns);
 	
 	/** Build a representation of the Table using the
 	 *  specified Exporter. Create an object from an
