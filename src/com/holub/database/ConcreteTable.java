@@ -27,7 +27,12 @@
 package com.holub.database;
 
 import java.io.*;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.Map.Entry;
+
+import com.holub.text.Token;
+import com.holub.text.TokenSet;
 import com.holub.tools.ArrayIterator;
 
 /**
@@ -68,6 +73,14 @@ import com.holub.tools.ArrayIterator;
 	private transient LinkedList transactionStack = new LinkedList();
 	
 	private AggregateStrategy agg_strat = null;
+
+	private final TokenSet tokens = new TokenSet();
+	private final Token
+		COUNT	= tokens.create("'COUNT"),
+		AVG		= tokens.create("'AVG"),
+		MIN		= tokens.create("'MIN"),
+		MAX		= tokens.create("'MAX"),
+		SUM		= tokens.create("'SUM");
 
 	/**********************************************************************
 	 * Create a table with the given name and columns.
@@ -440,6 +453,22 @@ import com.holub.tools.ArrayIterator;
 			if (where.approve(envelope)) {
 				Object[] newRow = new Object[requestedColumns.length];
 				for (int column = 0; column < requestedColumns.length; ++column) {
+					if (COUNT.match(requestedColumns[column], 0) ||
+						AVG.match(requestedColumns[column], 0) ||
+						MIN.match(requestedColumns[column], 0) ||
+						MAX.match(requestedColumns[column], 0) ||
+						SUM.match(requestedColumns[column], 0)) {
+							String target_column = parseColumnFromAgg(requestedColumns[column])[2];
+
+							if (target_column.equals("*") && COUNT.match(requestedColumns[column], 0))
+								target_column = columnNames[0];
+						//	else
+						//		throw new SQLException("cannot input * on aggregate function execpt count");
+
+							newRow[column] = currentRow.column(target_column);
+							continue;
+					}
+
 					newRow[column] = currentRow.column(requestedColumns[column]);
 				}
 				resultTable.insert(newRow);
@@ -685,6 +714,120 @@ import com.holub.tools.ArrayIterator;
 		
 	}
 	
+	// GROUP BY
+	public Table groupby(List group_by, List columns) {
+		// 배열 복사
+		String[] toClone = new String[columns.size()];
+		for (int i = 0; i < columns.size(); i++)
+			toClone[i] = (String)columns.get(i);
+
+		ConcreteTable resultTable = new ConcreteTable(this.tableName, toClone.clone());
+		Cursor cursor = this.rows();
+
+		if (group_by == null) { // group by가 없는 집계함수는 한 줄만 출력하도록
+			boolean done_agg = false;
+			Object[] newRow = new Object[columns.size()];
+			cursor.advance();
+
+			for (int i = 0; i < columns.size(); ++i) {
+				if (COUNT.match((String)columns.get(i), 0)) {
+					done_agg = true;
+					newRow[i] = (new AggCount()).apply(this, (String)columns.get(i));
+					continue;
+				}
+				else if (MIN.match((String)columns.get(i), 0)) {
+					done_agg = true;
+					newRow[i] = (new AggMin()).apply(this, (String)columns.get(i));
+					continue;
+				}
+				else if (MAX.match((String)columns.get(i), 0)) {
+					done_agg = true;
+					newRow[i] = (new AggMax()).apply(this, (String)columns.get(i));
+					continue;
+				}
+				else if (SUM.match((String)columns.get(i), 0)) {
+					done_agg = true;
+					newRow[i] = (new AggSum()).apply(this, (String)columns.get(i));
+					continue;
+				}
+				else if (AVG.match((String)columns.get(i), 0)) {
+					done_agg = true;
+					newRow[i] = (new AggAverage()).apply(this, (String)columns.get(i));
+					continue;
+				}
+
+				newRow[i] = cursor.column((String)columns.get(i));
+			}
+
+			if (!done_agg)
+				return this;
+
+			resultTable.insert(newRow);
+		}
+		else {	// group by
+			HashMap<String, ArrayList<Integer>> hashMap = new HashMap<>(); // 분류를 위한 map
+			String target_group = (String)group_by.get(0); // 현재는 단일 group by..
+			String content = "";
+
+			// 분류하기
+			while (cursor.advance()) {
+				for (int i = 0; i < columns.size(); ++i) {
+					String c = (String)columns.get(i);
+					
+					if (target_group.equals(c)) {
+						content = (String)cursor.column(c);
+
+						if (!hashMap.containsKey(content))
+							hashMap.put(content, new ArrayList<>());
+					}
+					else {
+						hashMap.get(content).add(Integer.parseInt((String)cursor.column(c)));
+						
+					}
+				}
+			}
+
+			// 계산하기
+			for (Entry<String, ArrayList<Integer>> entry: hashMap.entrySet()) {
+				Object[] newRow = new Object[columns.size()];
+
+				for (int i = 0; i < columns.size(); ++i) {
+					String c = (String)columns.get(i);
+
+					if (target_group.equals(c)) {
+						newRow[i] = entry.getKey();
+					}
+					else {
+						if (COUNT.match(c, 0)) {
+							newRow[i] = entry.getValue().size();
+						}
+						else if (MIN.match(c, 0)) {
+							newRow[i] = Collections.min(entry.getValue());
+						}
+						else if (MAX.match(c, 0)) {
+							newRow[i] = Collections.max(entry.getValue());
+						}
+						else if (SUM.match(c, 0)) {
+							newRow[i] = 0;
+							for (int num : entry.getValue())
+								newRow[i] = (int)newRow[i] + num;
+						}
+						else if (AVG.match(c, 0)) {
+							newRow[i] = 0;
+							for (int num : entry.getValue())
+								newRow[i] = (int)newRow[i] + num;
+							newRow[i] = (int)newRow[i] / entry.getValue().size();
+						}
+					}
+				}
+
+				resultTable.insert(newRow);
+			}
+		}
+
+		return resultTable;
+	}
+
 	// Housekeeping stuff
 	//
 	public String name() {
@@ -701,6 +844,22 @@ import com.holub.tools.ArrayIterator;
 
 	private int width() {
 		return columnNames.length;
+	}
+
+	private String[] parseColumnFromAgg(String input) {
+		String[] result = { "", "", "" };
+
+		String[] s = input.split("[( )]");
+
+		if (s.length == 3) {
+			return s;
+		}
+		else if (s.length == 2) {
+			result[0] = s[0];
+			result[2] = s[1];
+		}
+
+		return result;
 	}
 
 	// ----------------------------------------------------------------------

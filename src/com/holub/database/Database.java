@@ -26,15 +26,28 @@
  */
 package com.holub.database;
 
-import java.util.*;
-import java.io.*;
-import java.text.NumberFormat;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
+import com.holub.text.ParseFailure;
+import com.holub.text.Scanner;
 import com.holub.text.Token;
 import com.holub.text.TokenSet;
-import com.holub.text.Scanner;
-import com.holub.text.ParseFailure;
 import com.holub.tools.ThrowableContainer;
 
 /***
@@ -414,7 +427,7 @@ public final class Database
 		SUM			= tokens.create("'SUM"),
 		MIN			= tokens.create("'MIN"),
 		MAX			= tokens.create("'MAX"),
-		AGGREGATE	= tokens.create( "COUNT|AVG|SUM|MIN|MAX"),
+		//AGGREGATE	= tokens.create( "COUNT|AVG|SUM|MIN|MAX"),
 		
 		WORK		= tokens.create( "WORK|TRAN(SACTION)?"		),
 		ADDITIVE	= tokens.create( "\\+|-" 					),
@@ -901,7 +914,7 @@ public final class Database
 				throw in.failure("distinct or identifier expected.");
 		}
 		else {
-			id += "null";
+			id += "*";
 		}
 
 		in.required(RP);
@@ -1559,6 +1572,19 @@ public final class Database
 			if (order_by != null) {
 //						Table temp = result.orderby(order_by, order);
 //						result = temp;
+			}
+
+			// group by 적용
+			if (group_by != null)
+				result = result.groupby(group_by, columns);
+			else if (columns != null) {
+				for (Object column : columns) {
+					String c = (String)column;
+					if (COUNT.match(c, 0) || AVG.match(c, 0) || MIN.match(c, 0) || MAX.match(c, 0) || SUM.match(c, 0)) {
+						result = result.groupby(group_by, columns);
+						break;
+					}
+				}
 			}
 			
 			// Aggregate functions Test
