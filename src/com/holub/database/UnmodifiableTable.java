@@ -132,4 +132,10 @@ public class UnmodifiableTable implements Table
 		// TODO Auto-generated method stub
 		wrapped.agg_test(columnName);
 	}
+
+	@Override
+	public Table groupby(List group_by, List columns) {
+		// TODO Auto-generated method stub
+		return wrapped.groupby(group_by, columns);
+	}
 }

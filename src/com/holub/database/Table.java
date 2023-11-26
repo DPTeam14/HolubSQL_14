@@ -248,6 +248,8 @@ public interface Table extends Serializable, Cloneable
 	Table distinct();
 	Table orderby(List order_by, String order);
 	void agg_test(String columnName);
+
+	Table groupby(List group_by, List columns);
 	
 	/** Build a representation of the Table using the
 	 *  specified Exporter. Create an object from an
