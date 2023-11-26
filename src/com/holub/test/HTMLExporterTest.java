@@ -60,20 +60,20 @@ public class HTMLExporterTest {
         
         
         try {
-            StringBuffer stringBuffer = new StringBuffer();
-
             // 테스트 테이블 생성
             Table HTMLTestTable = TableFactory.create("HTMLTestTable", new String[] { "addrId", "street", "city", "state", "zip" });
             HTMLTestTable.insert(new Object[] { "1", "123 MyStreet", "Berkeley", "CA", "99999" });
             HTMLTestTable.insert(new Object[] { "2", "34 Quarry", "Ln.Bedrock", "AZ", "12345" });
             HTMLTestTable.insert(new Object[] { "3", "34 Quarry", "Busan", "BB", "12321" });
-
+            
             // html 형식으로 내보내기
             Writer out = new FileWriter("c:/dp2023/HTMLTestTable.html");
 			HTMLTestTable.export(new HTMLExporter(out));
 			out.close();
-
+            
             // html 파일 읽어오기
+            StringBuffer stringBuffer = new StringBuffer();
+
             File file = new File("c:/dp2023/HTMLTestTable.html");
             FileReader fileReader = new FileReader(file);
             int index = 0;

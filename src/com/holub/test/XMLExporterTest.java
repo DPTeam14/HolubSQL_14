@@ -12,7 +12,7 @@ import com.holub.database.XMLExporter;
 public class XMLExporterTest {
 
     @Test
-    public void testXMLExporter() {
+    public void XMLExporterTest() {
 
         // 정답 준비
         String answer =
@@ -42,20 +42,20 @@ public class XMLExporterTest {
         "</XMLTestTable>\n";
         
         try {
-            StringBuffer stringBuffer = new StringBuffer();
-
             // 테스트 테이블 생성
             Table XMLTestTable = TableFactory.create("XMLTestTable", new String[] { "addrId", "street", "city", "state", "zip" });
             XMLTestTable.insert(new Object[] { "1", "123 MyStreet", "Berkeley", "CA", "99999" });
             XMLTestTable.insert(new Object[] { "2", "34 Quarry", "Ln.Bedrock", "AZ", "12345" });
             XMLTestTable.insert(new Object[] { "3", "34 Quarry", "Busan", "BB", "12321" });
-
+            
             // xml파일형식으로 export
             Writer out = new FileWriter("c:/dp2023/XMLTestTable.xml");
 			XMLTestTable.export(new XMLExporter(out));
 			out.close();
-
+            
             // 생성된 파일을 읽어오는 과정
+            StringBuffer stringBuffer = new StringBuffer();
+
             File file = new File("c:/dp2023/XMLTestTable.xml");
             FileReader fileReader = new FileReader(file);
             int index = 0;
