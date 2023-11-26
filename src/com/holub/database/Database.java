@@ -1555,14 +1555,17 @@ public final class Database
 				result = temp;
 			}
 			// Order by 적용
-			if (order_by != null && order_by.get(1) == "desc") {
-						Table temp = result.accept(new DescVisitor());
-						result = temp;
+			if (order_by != null) {
+				if (order_by.get(1) == "desc") {
+					Table temp = result.accept(new DescVisitor(), order_by);
+					result = temp;
+				}
+				else {
+					Table temp = result.accept(new AscVisitor(), order_by);
+					result = temp;
+				}
 			}
-			else {
-				Table temp = result.accept(new AscVisitor());
-				result = temp;
-			}
+			
 			
 			// Aggregate functions Test
 			// select * from sample2		use this query to test

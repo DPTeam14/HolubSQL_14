@@ -199,6 +199,20 @@ import com.holub.tools.ArrayIterator;
 		registerInsert(newRow);
 		isDirty = true;
 	}
+	
+	// rowset 의 맨 앞에 insert 진행
+	public int insertFirst(Object[] values) {
+		assert values.length == width() : "Values-array length (" + values.length + ") "
+				+ "is not the same as table width (" + width() + ")";
+
+		doInsertFirst((Object[]) values.clone());
+		return 1;
+	}
+	private void doInsertFirst(Object[] newRow) {
+		rowSet.addFirst(newRow);
+		registerInsert(newRow);
+		isDirty = true;
+	}
 
 	// @insert-end
 	// ----------------------------------------------------------------------
@@ -250,6 +264,11 @@ import com.holub.tools.ArrayIterator;
 			return t == ConcreteTable.this;
 		}
 
+		// 외부에서 cursor 를 통해 row 접근
+		public Object[] getCloneRow() {
+			return (Object[]) (row.clone());
+		}
+		
 		// This method is for use by the outer class only, and is not part
 		// of the Cursor interface.
 		private Object[] cloneRow() {
@@ -626,7 +645,7 @@ import com.holub.tools.ArrayIterator;
 				if (dup)	break;
 			}
 			if (!dup)	resultTable.insert(cur_org.cloneRow());
-			}
+		}
 		return resultTable;
 	}
 	
@@ -641,8 +660,8 @@ import com.holub.tools.ArrayIterator;
 	}
 	
 	// ORDER BY - Visitor Accept
-	public Table accept(Visitor visitor) {
-		return visitor.visit(this);
+	public Table accept(Visitor visitor, List order_by) {		
+		return visitor.visit(this, order_by);
 	}
 	
 	public void testPrint(Object[] arr) {

@@ -128,8 +128,8 @@ public class UnmodifiableTable implements Table
 	}
 
 	@Override
-	public Table accept(Visitor visitor) {
+	public Table accept(Visitor visitor, List order_by) {
 		// TODO Auto-generated method stub
-		return visitor.visit(wrapped);
+		return visitor.visit(wrapped, order_by);
 	}
 }

@@ -120,6 +120,9 @@ public interface Cursor
 	 */
 	boolean isTraversing( Table t );
 
+	// 외부에서 cursor 를 통해 row 접근
+	Object[] getCloneRow();
+	
 	/** Replace the value of the indicated column of the current
 	 *  row with the indicated new value.
 	 *
