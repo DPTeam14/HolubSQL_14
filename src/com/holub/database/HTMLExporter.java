@@ -66,7 +66,7 @@ public class HTMLExporter implements Table.Exporter{
             writeTag("h1");
         }
 
-        writeTag("table");
+        writeTag("table border=\"1\"");
         writeTag("tr");
         while(columnNames.hasNext()){
             writeTag("th");

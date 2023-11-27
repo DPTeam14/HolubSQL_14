@@ -17,12 +17,10 @@ public class HTMLExporterTest {
         // 정답 준비
         String answer =
         "<!DOCTYPE html>\n"+
-        "\n"+
         "<html>\n"+
         "  <head>\n"+
         "    <title>HTMLTestTable</title>\n"+
         "  </head>\n"+
-        "\n"+
         "  <body>\n"+
         "    <h1>HTMLTestTable</h1>\n"+
         "    <table border=\"1\">\n"+
