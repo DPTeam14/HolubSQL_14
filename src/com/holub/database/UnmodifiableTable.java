@@ -122,12 +122,6 @@ public class UnmodifiableTable implements Table
 	}
 
 	@Override
-	public void agg_test(String columnName) {
-		// TODO Auto-generated method stub
-		wrapped.agg_test(columnName);
-	}
-
-	@Override
 	public Table accept(Visitor visitor, List order_by) {
 		// TODO Auto-generated method stub
 		return visitor.visit(wrapped, order_by);

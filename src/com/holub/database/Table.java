@@ -248,7 +248,6 @@ public interface Table extends Serializable, Cloneable
 	Table distinct();
 	// Order by		Visitor 패턴 적용으로 인한 accept 함수
 	Table accept(Visitor visitor, List order_by);
-	void agg_test(String columnName);
 
 	Table groupby(List group_by, List columns);
 	

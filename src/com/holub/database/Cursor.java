@@ -122,6 +122,8 @@ public interface Cursor
 
 	// 외부에서 cursor 를 통해 row 접근
 	Object[] getCloneRow();
+	// rowIterator 의 hasNext
+	boolean hasNext();
 	
 	/** Replace the value of the indicated column of the current
 	 *  row with the indicated new value.

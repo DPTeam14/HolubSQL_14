@@ -843,7 +843,6 @@ public final class Database
 
 			List order_by = (in.matchAdvance(ORDER_BY) == null)
 					? null : orderList();
-			System.out.println("orderList() : " + order_by);
 			
 			Table result = doSelect(columns, into,
 								requestedTableNames, where, distinct, group_by, order_by );
@@ -1591,12 +1590,6 @@ public final class Database
 					}
 				}
 			}
-			
-			
-			// Aggregate functions Test
-			// select * from sample2		use this query to test
-//			System.out.println("==Aggregate Function Test==");
-//			result.agg_test("salary");
 		
 			// If this is a "SELECT INTO <table>" request, remove the 
 			// returned table from the UnmodifiableTable wrapper, give

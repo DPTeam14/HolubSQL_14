@@ -214,15 +214,15 @@ import com.holub.tools.ArrayIterator;
 	}
 	
 	// rowset 의 맨 앞에 insert 진행
-	public int insertFirst(Object[] values) {
+	public int insertByIndex(int index, Object[] values) {
 		assert values.length == width() : "Values-array length (" + values.length + ") "
 				+ "is not the same as table width (" + width() + ")";
 
-		doInsertFirst((Object[]) values.clone());
+		doInsertByIndex(index, (Object[]) values.clone());
 		return 1;
 	}
-	private void doInsertFirst(Object[] newRow) {
-		rowSet.addFirst(newRow);
+	private void doInsertByIndex(int index, Object[] newRow) {
+		rowSet.add(index, newRow);
 		registerInsert(newRow);
 		isDirty = true;
 	}
@@ -250,6 +250,10 @@ import com.holub.tools.ArrayIterator;
 				return true;
 			}
 			return false;
+		}
+		
+		public boolean hasNext() {
+			return rowIterator.hasNext();
 		}
 
 		public int columnCount() {
@@ -700,30 +704,6 @@ import com.holub.tools.ArrayIterator;
 			cnt++;
 		}
 		System.out.println();
-	}
-	
-	// Test method for Aggregate function
-	public void agg_test(String columnName) {
-		System.out.println("==COUNT==");
-		this.agg_strat = new AggCount();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==SUM==");
-		this.agg_strat = new AggSum();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==AVG==");
-		this.agg_strat = new AggAverage();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==MIN==");
-		this.agg_strat = new AggMin();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==MAX==");
-		this.agg_strat = new AggMax();
-		System.out.println(agg_strat.apply(this, columnName));
-		
 	}
 	
 	// GROUP BY
