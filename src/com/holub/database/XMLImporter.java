@@ -19,6 +19,38 @@ public class XMLImporter implements Table.Importer {
                     : new BufferedReader(in);
     }
 
+    // 주어진 스트링에서 태그이름을 반환합니다.
+    private String getTagName(String line) {
+        String tagName = line.split("<")[1].split(">")[0].split(" ")[0];
+
+        if (tagName.startsWith("/")) {
+            tagName = tagName.substring(1);
+        }
+
+        return tagName;
+    }
+
+    // 태그로 감싸진 데이터를 반환합니다.
+    private String getTagValue(String line) {
+        String tagValue = line.split("<")[1].split(">")[1];
+
+        return tagValue;
+    }
+
+    // 각줄에 대해서 태그이름과 데이터를 반환하여 각각 저장합니다.
+    private void processLine(String line) {
+        String tagName = getTagName(line);
+        String tagValue = getTagValue(line);
+
+        if (!columnNames.contains(tagName)) {
+            columnNames.add(tagName);
+        }
+        if (!tagValue.isEmpty()) {
+            currentRowData.add(tagValue);
+        }
+    }
+
+    // 테이블 정보를 저장하는 메소드
     public void startTable() throws IOException{ 
         BufferedReader reader = new BufferedReader(in);
         String line;
@@ -72,31 +104,4 @@ public class XMLImporter implements Table.Importer {
     }
 
     public void endTable() { }
-
-    private String getTagName(String line) {
-        String tagName = line.split("<")[1].split(">")[0].split(" ")[0];
-
-        if (tagName.startsWith("/")) {
-            tagName = tagName.substring(1);
-        }
-
-        return tagName;
-    }
-    private String getTagValue(String line) {
-        String tagValue = line.split("<")[1].split(">")[1];
-
-        return tagValue;
-    }
-
-    private void processLine(String line) {
-        String tagName = getTagName(line);
-        String tagValue = getTagValue(line);
-
-        if (!columnNames.contains(tagName)) {
-            columnNames.add(tagName);
-        }
-        if (!tagValue.isEmpty()) {
-            currentRowData.add(tagValue);
-        }
-    }
 }
