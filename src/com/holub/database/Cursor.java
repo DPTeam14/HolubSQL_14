@@ -95,6 +95,9 @@ public interface Cursor
 	 */
 	String columnName(int index);
 
+	// Cursor 에서 Table 의 colNames 을 접근
+	String[] columnNames();
+	
 	/** Return the contents of the requested column of the current
 	 *  row. You should
 	 *  treat the cells accessed through this method as read only
@@ -117,6 +120,11 @@ public interface Cursor
 	 */
 	boolean isTraversing( Table t );
 
+	// 외부에서 cursor 를 통해 row 접근
+	Object[] getCloneRow();
+	// rowIterator 의 hasNext
+	boolean hasNext();
+	
 	/** Replace the value of the indicated column of the current
 	 *  row with the indicated new value.
 	 *

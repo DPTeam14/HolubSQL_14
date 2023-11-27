@@ -212,6 +212,20 @@ import com.holub.tools.ArrayIterator;
 		registerInsert(newRow);
 		isDirty = true;
 	}
+	
+	// rowset 의 맨 앞에 insert 진행
+	public int insertByIndex(int index, Object[] values) {
+		assert values.length == width() : "Values-array length (" + values.length + ") "
+				+ "is not the same as table width (" + width() + ")";
+
+		doInsertByIndex(index, (Object[]) values.clone());
+		return 1;
+	}
+	private void doInsertByIndex(int index, Object[] newRow) {
+		rowSet.add(index, newRow);
+		registerInsert(newRow);
+		isDirty = true;
+	}
 
 	// @insert-end
 	// ----------------------------------------------------------------------
@@ -237,6 +251,10 @@ import com.holub.tools.ArrayIterator;
 			}
 			return false;
 		}
+		
+		public boolean hasNext() {
+			return rowIterator.hasNext();
+		}
 
 		public int columnCount() {
 			return columnNames.length;
@@ -244,6 +262,11 @@ import com.holub.tools.ArrayIterator;
 
 		public String columnName(int index) {
 			return columnNames[index];
+		}
+		
+		// Cursor 를 통해서 colNames 획득
+		public String[] columnNames() {
+			return columnNames;
 		}
 
 		public Object column(String columnName) {
@@ -258,6 +281,11 @@ import com.holub.tools.ArrayIterator;
 			return t == ConcreteTable.this;
 		}
 
+		// 외부에서 cursor 를 통해 row 접근
+		public Object[] getCloneRow() {
+			return (Object[]) (row.clone());
+		}
+		
 		// This method is for use by the outer class only, and is not part
 		// of the Cursor interface.
 		private Object[] cloneRow() {
@@ -650,7 +678,7 @@ import com.holub.tools.ArrayIterator;
 				if (dup)	break;
 			}
 			if (!dup)	resultTable.insert(cur_org.cloneRow());
-			}
+		}
 		return resultTable;
 	}
 	
@@ -664,14 +692,11 @@ import com.holub.tools.ArrayIterator;
 		return true;
 	}
 	
-	// ORDER BY
-	public Table orderby(List order_by, String order) {
-		ConcreteTable resultTable = new ConcreteTable(null, this.columnNames);
-		
-		// will be implemented...
-		
-		return resultTable;
+	// ORDER BY - Visitor Accept
+	public Table accept(Visitor visitor, List order_by) {		
+		return visitor.visit(this, order_by);
 	}
+	
 	public void testPrint(Object[] arr) {
 		int cnt = 0;
 		while (arr.length > cnt) {
@@ -679,39 +704,6 @@ import com.holub.tools.ArrayIterator;
 			cnt++;
 		}
 		System.out.println();
-	}
-	
-	// Sorting order
-	public void ascending (List idList) {
-		
-	}
-	
-	private void swap () {
-		
-	}
-	
-	// Test method for Aggregate function
-	public void agg_test(String columnName) {
-		System.out.println("==COUNT==");
-		this.agg_strat = new AggCount();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==SUM==");
-		this.agg_strat = new AggSum();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==AVG==");
-		this.agg_strat = new AggAverage();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==MIN==");
-		this.agg_strat = new AggMin();
-		System.out.println(agg_strat.apply(this, columnName));
-		
-		System.out.println("==MAX==");
-		this.agg_strat = new AggMax();
-		System.out.println(agg_strat.apply(this, columnName));
-		
 	}
 	
 	// GROUP BY

@@ -122,18 +122,11 @@ public class UnmodifiableTable implements Table
 	}
 
 	@Override
-	public Table orderby(List order_by, String order) {
+	public Table accept(Visitor visitor, List order_by) {
 		// TODO Auto-generated method stub
-		return wrapped.orderby(order_by, order);
+		return visitor.visit(wrapped, order_by);
 	}
-
-	@Override
-	public void agg_test(String columnName) {
-		// TODO Auto-generated method stub
-		wrapped.agg_test(columnName);
-	}
-
-	@Override
+	
 	public Table groupby(List group_by, List columns) {
 		// TODO Auto-generated method stub
 		return wrapped.groupby(group_by, columns);

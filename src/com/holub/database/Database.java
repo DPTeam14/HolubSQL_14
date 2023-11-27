@@ -427,7 +427,6 @@ public final class Database
 		SUM			= tokens.create("'SUM"),
 		MIN			= tokens.create("'MIN"),
 		MAX			= tokens.create("'MAX"),
-		//AGGREGATE	= tokens.create( "COUNT|AVG|SUM|MIN|MAX"),
 		
 		WORK		= tokens.create( "WORK|TRAN(SACTION)?"		),
 		ADDITIVE	= tokens.create( "\\+|-" 					),
@@ -844,7 +843,6 @@ public final class Database
 
 			List order_by = (in.matchAdvance(ORDER_BY) == null)
 					? null : orderList();
-//			System.out.println("orderList() : " + order_by);
 			
 			Table result = doSelect(columns, into,
 								requestedTableNames, where, distinct, group_by, order_by );
@@ -939,7 +937,7 @@ public final class Database
 //	}
 
 	
-	// 테스트용 변형 idList	양원우
+		// 변형 idList	양원우
 		private List orderList()			throws ParseFailure
 		{	List identifiers = null;
 			if( in.matchAdvance(STAR) == null )
@@ -949,11 +947,11 @@ public final class Database
 				while( (id = in.required(IDENTIFIER)) != null ) {
 					identifiers.add(id);
 
-//					if ((order = in.matchAdvance(ASC_DESC)) != null ) {
-//						System.out.println("add");
-//					}
-//					else	order = "asc";
-//					identifiers.add(order);
+					if ((order = in.matchAdvance(DESC)) != null )
+						order = "desc";
+					else
+						order = "asc";
+					identifiers.add(order);
 					
 					if( in.matchAdvance(COMMA) == null )
 						break;
@@ -1570,8 +1568,14 @@ public final class Database
 			}
 			// Order by 적용
 			if (order_by != null) {
-//						Table temp = result.orderby(order_by, order);
-//						result = temp;
+				if (order_by.get(1) == "desc") {
+					Table temp = result.accept(new DescVisitor(), order_by);
+					result = temp;
+				}
+				else {
+					Table temp = result.accept(new AscVisitor(), order_by);
+					result = temp;
+				}
 			}
 
 			// group by 적용
@@ -1586,11 +1590,6 @@ public final class Database
 					}
 				}
 			}
-			
-			// Aggregate functions Test
-			// select * from sample2		use this query to test
-			System.out.println("==Aggregate Function Test==");
-//			result.agg_test("salary");
 		
 			// If this is a "SELECT INTO <table>" request, remove the 
 			// returned table from the UnmodifiableTable wrapper, give

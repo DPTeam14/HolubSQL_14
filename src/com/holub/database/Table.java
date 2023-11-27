@@ -244,10 +244,10 @@ public interface Table extends Serializable, Cloneable
 	 */
 	Cursor rows();
 
-	// 자신의 rows 에서 중복된 row 제외한 table 반환	양원우
+	// 자신의 rows 에서 중복된 row 제외한 table 반환
 	Table distinct();
-	Table orderby(List order_by, String order);
-	void agg_test(String columnName);
+	// Order by		Visitor 패턴 적용으로 인한 accept 함수
+	Table accept(Visitor visitor, List order_by);
 
 	Table groupby(List group_by, List columns);
 	
