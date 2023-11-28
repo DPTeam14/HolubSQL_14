@@ -100,6 +100,10 @@ import com.holub.tools.ArrayIterator;
 		return columnNames;
 	}
 
+	public void setAggregateStrategy(AggregateStrategy aggregateStrategy) {
+		this.agg_strat = aggregateStrategy;
+	}
+
 	/**********************************************************************
 	 * Return the index of the named column. Throw an IndexOutOfBoundsException if
 	 * the column doesn't exist.
