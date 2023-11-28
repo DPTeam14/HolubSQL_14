@@ -12,7 +12,7 @@ import com.holub.database.TableFactory;
 public class HTMLExporterTest {
 
     @Test
-    public void testHTMLExporter() {
+    public void HTMLExporterTest() {
 
         // 정답 준비
         String answer =
@@ -23,7 +23,7 @@ public class HTMLExporterTest {
         "  </head>\n"+
         "  <body>\n"+
         "    <h1>HTMLTestTable</h1>\n"+
-        "    <table border=\"1\">\n"+
+        "    <table>\n"+
         "      <tr>\n"+
         "        <th>addrId</th>\n"+
         "        <th>street</th>\n"+
